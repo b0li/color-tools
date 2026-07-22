@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+
+<!-- Color Tools -->
+<!-- Sammlung von Farb-Werkzeugen, aktuell: RGB/RGBA zu HEX -->
+<!-- Style: Lake Studio Dark Theme (DM Serif Display / DM Sans) -->
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Color Tools</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+
+<style>
+
+	:root {
+		--bg: #1a1d23;
+		--surface: #22262e;
+		--surface-2: #2a2f39;
+		--border: #333844;
+		--accent: #d4a55a;
+		--accent-dim: rgba( 212, 165, 90, 0.15 );
+		--green: #6abf69;
+		--red: #e06c6c;
+		--text: #e8eaf0;
+		--text-dim: #8a909e;
+		--radius: 10px;
+	}
+
+	html {
+		min-height: 100%;
+	}
+
+	body {
+		background: var( --bg );
+		margin: 0;
+		min-height: 100%;
+		font-family: 'DM Sans', system-ui, sans-serif;
+		position: relative;
+	}
+
+	body::before {
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		background-image:
+			linear-gradient( to right, rgba( 255, 255, 255, 0.04 ) 1px, transparent 1px ),
+			linear-gradient( to bottom, rgba( 255, 255, 255, 0.04 ) 1px, transparent 1px );
+		background-size: 24px 24px;
+		mask-image: radial-gradient( ellipse at center, transparent, var( --bg ) );
+		-webkit-mask-image: radial-gradient( ellipse at center, transparent, var( --bg ) );
+	}
+
+	.ct-tool {
+		max-width: 860px;
+		margin: 0 auto;
+		background: var( --bg );
+		color: var( --text );
+		font-family: 'DM Sans', system-ui, sans-serif;
+		padding: 32px 16px 50vh;
+		border-radius: var( --radius );
+	}
+
+	.ct-tool * {
+		box-sizing: border-box;
+	}
+
+	.ct-page-header {
+		margin-bottom: 32px;
+	}
+
+	.ct-page-header h1 {
+		font-family: 'DM Serif Display', serif;
+		font-weight: 400;
+		font-size: 2rem;
+		color: var( --accent );
+		margin: 0 0 4px;
+	}
+
+	.ct-page-header p {
+		font-size: 0.9rem;
+		color: var( --text-dim );
+		margin: 0;
+	}
+
+	.ct-tab-bar {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		background: var( --bg );
+		padding: 12px 0;
+		display: flex;
+		gap: 8px;
+		margin: 0 0 32px;
+	}
+
+	.ct-tab-btn {
+		flex: 1;
+		padding: 8px 4px;
+		border-radius: 8px;
+		border: 1px solid var( --border );
+		background: var( --surface );
+		color: var( --text-dim );
+		font-family: 'DM Sans', system-ui, sans-serif;
+		font-size: 0.78rem;
+		font-weight: 500;
+		cursor: pointer;
+		text-align: center;
+		transition: all 0.15s ease;
+		white-space: nowrap;
+	}
+
+	.ct-tab-btn.is-active {
+		background: var( --accent-dim );
+		border-color: var( --accent );
+		color: var( --accent );
+		font-weight: 600;
+	}
+
+	.ct-section-header {
+		margin-top: 40px;
+		margin-bottom: 20px;
+		scroll-margin-top: 80px;
+	}
+
+	.ct-page-header + .ct-tab-bar + .ct-section-header {
+		margin-top: 0;
+	}
+
+	.ct-section-header h2 {
+		font-family: 'DM Serif Display', serif;
+		font-weight: 400;
+		font-size: 1.3rem;
+		color: var( --text );
+		margin: 0 0 4px;
+	}
+
+	.ct-section-header p {
+		font-size: 0.82rem;
+		color: var( --text-dim );
+		margin: 0;
+	}
+
+	.ct-scroll-nav {
+		position: fixed;
+		right: 24px;
+		top: 50%;
+		transform: translateY( -50% );
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		z-index: 100;
+	}
+
+	.ct-scroll-nav__item {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+		text-decoration: none;
+		justify-content: flex-end;
+	}
+
+	.ct-scroll-nav__label {
+		font-size: 0.75rem;
+		color: var( --text-dim );
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		white-space: nowrap;
+	}
+
+	.ct-scroll-nav__item:hover .ct-scroll-nav__label {
+		opacity: 1;
+	}
+
+	.ct-scroll-nav__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var( --border );
+		transition: background 0.2s ease, transform 0.2s ease;
+		flex-shrink: 0;
+	}
+
+	.ct-scroll-nav__item:hover .ct-scroll-nav__dot,
+	.ct-scroll-nav__item.is-active .ct-scroll-nav__dot {
+		background: var( --accent );
+		transform: scale( 1.4 );
+	}
+
+	.ct-scroll-nav__item.is-active .ct-scroll-nav__label {
+		opacity: 1;
+		color: var( --accent );
+	}
+
+	@media ( max-width: 1100px ) {
+
+		.ct-scroll-nav {
+			display: none;
+		}
+
+	}
+
+	.ct-card {
+		background: var( --surface );
+		border-radius: var( --radius );
+		border: 1px solid var( --border );
+		padding: 16px;
+		margin-bottom: 16px;
+	}
+
+	.ct-input-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.ct-input {
+		flex: 1;
+		min-width: 220px;
+		background: var( --surface-2 );
+		border: 1px solid var( --border );
+		border-radius: 6px;
+		padding: 12px 14px;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 1rem;
+		line-height: 1.5;
+		color: var( --text );
+		resize: none;
+		overflow: hidden;
+		min-height: 46px;
+	}
+
+	.ct-input::placeholder {
+		color: var( --text-dim );
+	}
+
+	.ct-input:focus {
+		outline: none;
+		border-color: var( --accent );
+	}
+
+	.ct-input[data-state="error"] {
+		border-color: var( --red );
+	}
+
+	.ct-hint {
+		font-size: 0.78rem;
+		color: var( --text-dim );
+		margin: 10px 0 0;
+	}
+
+	.ct-result {
+		display: flex;
+		align-items: stretch;
+		gap: 16px;
+		background: var( --surface );
+		border-radius: var( --radius );
+		border: 1px solid var( --border );
+		padding: 16px;
+		margin-bottom: 16px;
+		flex-wrap: wrap;
+	}
+
+	.ct-swatch {
+		width: 96px;
+		min-height: 96px;
+		border-radius: 8px;
+		border: 1px solid var( --border );
+		flex-shrink: 0;
+		/* Checkerboard shows alpha transparency */
+		background-image:
+			linear-gradient( 45deg, #3a3f4a 25%, transparent 25%, transparent 75%, #3a3f4a 75% ),
+			linear-gradient( 45deg, #3a3f4a 25%, transparent 25%, transparent 75%, #3a3f4a 75% );
+		background-size: 16px 16px;
+		background-position: 0 0, 8px 8px;
+		background-color: #22262e;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.ct-swatch__fill {
+		position: absolute;
+		inset: 0;
+		background: transparent;
+	}
+
+	.ct-values {
+		flex: 1;
+		min-width: 240px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.ct-value {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		background: var( --surface-2 );
+		border: 1px solid var( --border );
+		border-radius: 6px;
+		padding: 8px 12px;
+	}
+
+	.ct-value__label {
+		font-size: 0.72rem;
+		font-weight: 600;
+		color: var( --text-dim );
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		width: 62px;
+		flex-shrink: 0;
+	}
+
+	.ct-value__out {
+		flex: 1;
+		min-width: 0;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.95rem;
+		color: var( --text );
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.ct-value__out[data-empty="true"] {
+		color: var( --text-dim );
+	}
+
+	.btn {
+		padding: 8px 18px;
+		border-radius: 6px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		border: none;
+		cursor: pointer;
+		font-family: inherit;
+		transition: opacity 0.15s ease;
+	}
+
+	.btn:hover:not(:disabled) {
+		opacity: 0.85;
+	}
+
+	.btn:focus-visible {
+		outline: 2px solid var( --accent );
+		outline-offset: 2px;
+	}
+
+	.btn:disabled {
+		opacity: 0.4;
+		cursor: default;
+	}
+
+	.btn--accent {
+		background: var( --accent );
+		color: #1a1d23;
+	}
+
+	.btn--ghost {
+		background: var( --surface-2 );
+		color: var( --text-dim );
+		border: 1px solid var( --border );
+	}
+
+	.btn--mini {
+		padding: 5px 12px;
+		font-size: 0.75rem;
+		flex-shrink: 0;
+	}
+
+	.ct-actions {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		background: var( --surface );
+		border-radius: var( --radius );
+		border: 1px solid var( --border );
+		padding: 14px 16px;
+		flex-wrap: wrap;
+	}
+
+	.ct-status {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var( --text-dim );
+		margin-left: auto;
+	}
+
+	.ct-status[data-state="done"] {
+		color: var( --green );
+	}
+
+	.ct-status[data-state="error"] {
+		color: var( --red );
+	}
+
+	.ct-batch {
+		background: var( --surface );
+		border-radius: var( --radius );
+		border: 1px solid var( --border );
+		overflow: hidden;
+		margin-bottom: 16px;
+	}
+
+	.ct-batch__label {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var( --text-dim );
+		padding: 12px 16px;
+		border-bottom: 1px solid var( --border );
+	}
+
+	.ct-batch__list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		max-height: 320px;
+		overflow-y: auto;
+	}
+
+	.ct-batch__item {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 16px;
+		border-bottom: 1px solid var( --border );
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.85rem;
+	}
+
+	.ct-batch__item:last-child {
+		border-bottom: none;
+	}
+
+	.ct-batch__dot {
+		width: 20px;
+		height: 20px;
+		border-radius: 4px;
+		border: 1px solid var( --border );
+		flex-shrink: 0;
+	}
+
+	.ct-batch__src {
+		color: var( --text-dim );
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.ct-batch__hex {
+		color: var( --text );
+		font-weight: 600;
+	}
+
+	.ct-batch__hex[data-state="error"] {
+		color: var( --red );
+		font-weight: 400;
+	}
+
+	.ct-empty {
+		padding: 16px;
+		font-size: 0.85rem;
+		color: var( --text-dim );
+	}
+
+	@media ( max-width: 640px ) {
+
+		.ct-tab-bar {
+			gap: 6px;
+		}
+
+		.ct-tab-btn {
+			font-size: 0.7rem;
+			padding: 8px 2px;
+		}
+
+		.ct-status {
+			margin-left: 0;
+			width: 100%;
+		}
+
+		.ct-swatch {
+			width: 100%;
+			min-height: 64px;
+		}
+
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+</style>
+
+</head>
+<body>
+
+<div class="ct-tool">
+
+	<div class="ct-page-header">
+		<h1>Color Tools</h1>
+		<p>Sammlung praktischer Werkzeuge für Farben – Umrechnung, Formate und mehr</p>
+	</div><!-- end .ct-page-header -->
+
+	<div class="ct-tab-bar">
+		<button type="button" class="ct-tab-btn js-tab-btn" data-target="section-rgb-hex">RGB / RGBA → HEX</button>
+	</div><!-- end .ct-tab-bar -->
+
+	<div class="ct-section-header js-nav-section" id="section-rgb-hex">
+		<h2>RGB / RGBA → HEX</h2>
+		<p>RGB- oder RGBA-Wert einfügen – der HEX-Code wird sofort berechnet</p>
+	</div><!-- end .ct-section-header -->
+
+	<div class="ct-card">
+
+		<div class="ct-input-row">
+
+			<label for="rh-input" class="sr-only">RGB- oder RGBA-Wert</label>
+			<textarea
+				id="rh-input"
+				class="ct-input"
+				rows="1"
+				placeholder="rgba( 212, 165, 90, 0.5 )"
+				autocomplete="off"
+				spellcheck="false"
+			></textarea>
+
+			<button type="button" id="rh-btn-paste" class="btn btn--ghost">
+				Einfügen
+			</button>
+
+			<button type="button" id="rh-btn-clear" class="btn btn--ghost">
+				Leeren
+			</button>
+
+		</div><!-- end .ct-input-row -->
+
+		<p class="ct-hint">Akzeptiert u.&nbsp;a. <code>rgb(212, 165, 90)</code>, <code>rgba(212 165 90 / 50%)</code>, <code>212, 165, 90</code>, <code>212 165 90 0.5</code> – mehrere Werte einfach zeilenweise einfügen.</p>
+
+	</div><!-- end .ct-card -->
+
+	<div class="ct-result">
+
+		<div class="ct-swatch">
+			<span class="ct-swatch__fill" id="rh-swatch"></span>
+		</div><!-- end .ct-swatch -->
+
+		<div class="ct-values">
+
+			<div class="ct-value">
+				<span class="ct-value__label">HEX</span>
+				<span class="ct-value__out" id="rh-hex" data-empty="true">–</span>
+				<button type="button" class="btn btn--accent btn--mini js-copy" data-source="rh-hex" disabled>Kopieren</button>
+			</div>
+
+			<div class="ct-value">
+				<span class="ct-value__label">HEX 8</span>
+				<span class="ct-value__out" id="rh-hex8" data-empty="true">–</span>
+				<button type="button" class="btn btn--ghost btn--mini js-copy" data-source="rh-hex8" disabled>Kopieren</button>
+			</div>
+
+			<div class="ct-value">
+				<span class="ct-value__label">RGB</span>
+				<span class="ct-value__out" id="rh-rgb" data-empty="true">–</span>
+				<button type="button" class="btn btn--ghost btn--mini js-copy" data-source="rh-rgb" disabled>Kopieren</button>
+			</div>
+
+		</div><!-- end .ct-values -->
+
+	</div><!-- end .ct-result -->
+
+	<div class="ct-batch" id="rh-batch" hidden>
+
+		<div class="ct-batch__label">
+			<span>Mehrere Werte</span>
+			<span id="rh-batch-count">0</span>
+		</div>
+
+		<ul class="ct-batch__list" id="rh-batch-list"></ul>
+
+	</div><!-- end .ct-batch -->
+
+	<div class="ct-actions">
+
+		<button type="button" id="rh-btn-copy-all" class="btn btn--ghost" disabled>
+			Alle HEX kopieren
+		</button>
+
+		<span class="ct-status" id="rh-status" role="status"></span>
+
+	</div><!-- end .ct-actions -->
+
+</div><!-- end .ct-tool -->
+
+<nav class="ct-scroll-nav" aria-label="Sektionsnavigation">
+
+	<a class="ct-scroll-nav__item js-nav-item" href="#section-rgb-hex" data-target="section-rgb-hex" aria-label="Zu RGB / RGBA → HEX springen">
+		<span class="ct-scroll-nav__label">RGB / RGBA → HEX</span>
+		<span class="ct-scroll-nav__dot"></span>
+	</a>
+
+</nav><!-- end .ct-scroll-nav -->
+
+<script>
+
+	( function() {
+
+		const input = document.getElementById( 'rh-input' );
+		const swatch = document.getElementById( 'rh-swatch' );
+		const outHex = document.getElementById( 'rh-hex' );
+		const outHex8 = document.getElementById( 'rh-hex8' );
+		const outRgb = document.getElementById( 'rh-rgb' );
+		const batch = document.getElementById( 'rh-batch' );
+		const batchList = document.getElementById( 'rh-batch-list' );
+		const batchCount = document.getElementById( 'rh-batch-count' );
+		const btnPaste = document.getElementById( 'rh-btn-paste' );
+		const btnClear = document.getElementById( 'rh-btn-clear' );
+		const btnCopyAll = document.getElementById( 'rh-btn-copy-all' );
+		const status = document.getElementById( 'rh-status' );
+		const copyBtns = document.querySelectorAll( '.js-copy' );
+
+		const clamp = ( value, min, max ) => Math.min( max, Math.max( min, value ) );
+
+		// Accepts "50%" (of 255) or a plain 0-255 number
+		function parseChannel( raw ) {
+
+			if ( raw.endsWith( '%' ) ) {
+
+				const percent = parseFloat( raw );
+				if ( isNaN( percent ) ) return null;
+
+				return clamp( Math.round( percent * 2.55 ), 0, 255 );
+
+			}
+
+			const value = parseFloat( raw );
+			if ( isNaN( value ) ) return null;
+
+			return clamp( Math.round( value ), 0, 255 );
+
+		}
+
+		// Accepts "50%" or 0-1
+		function parseAlpha( raw ) {
+
+			if ( raw.endsWith( '%' ) ) {
+
+				const percent = parseFloat( raw );
+				if ( isNaN( percent ) ) return null;
+
+				return clamp( percent / 100, 0, 1 );
+
+			}
+
+			const value = parseFloat( raw );
+			if ( isNaN( value ) ) return null;
+
+			return clamp( value, 0, 1 );
+
+		}
+
+		function parseColor( raw ) {
+
+			// Strip the rgb()/rgba() wrapper, keep only the values
+			let text = raw.trim().replace( /^rgba?\s*\(/i, '' ).replace( /\)\s*$/, '' ).trim();
+
+			if ( ! text ) return null;
+
+			// Normalize separators: comma and slash (modern syntax) both become spaces
+			const parts = text.replace( /[,/]/g, ' ' ).split( /\s+/ ).filter( Boolean );
+
+			if ( parts.length < 3 || parts.length > 4 ) return null;
+
+			const r = parseChannel( parts[0] );
+			const g = parseChannel( parts[1] );
+			const b = parseChannel( parts[2] );
+
+			if ( r === null || g === null || b === null ) return null;
+
+			let a = 1;
+
+			if ( parts.length === 4 ) {
+
+				a = parseAlpha( parts[3] );
+				if ( a === null ) return null;
+
+			}
+
+			return { r, g, b, a };
+
+		}
+
+		const toHexPart = ( value ) => value.toString( 16 ).padStart( 2, '0' ).toUpperCase();
+
+		const toHex = ( color ) => '#' + toHexPart( color.r ) + toHexPart( color.g ) + toHexPart( color.b );
+
+		const toHex8 = ( color ) => toHex( color ) + toHexPart( Math.round( color.a * 255 ) );
+
+		function toRgbString( color ) {
+
+			if ( color.a < 1 ) {
+
+				return 'rgba( ' + color.r + ', ' + color.g + ', ' + color.b + ', ' + color.a + ' )';
+
+			}
+
+			return 'rgb( ' + color.r + ', ' + color.g + ', ' + color.b + ' )';
+
+		}
+
+		function setValue( el, text ) {
+
+			const isEmpty = ! text;
+
+			el.textContent = isEmpty ? '–' : text;
+			el.setAttribute( 'data-empty', isEmpty ? 'true' : 'false' );
+
+		}
+
+		function setCopyEnabled( enabled ) {
+
+			copyBtns.forEach( ( btn ) => {
+
+				btn.disabled = ! enabled;
+
+			});
+
+		}
+
+		function renderSingle( color ) {
+
+			if ( ! color ) {
+
+				swatch.style.background = 'transparent';
+				setValue( outHex, '' );
+				setValue( outHex8, '' );
+				setValue( outRgb, '' );
+				setCopyEnabled( false );
+				return;
+
+			}
+
+			swatch.style.background = toRgbString( color );
+			setValue( outHex, toHex( color ) );
+			setValue( outHex8, toHex8( color ) );
+			setValue( outRgb, toRgbString( color ) );
+			setCopyEnabled( true );
+
+		}
+
+		function renderBatch( lines ) {
+
+			batchList.innerHTML = '';
+
+			lines.forEach( ( line ) => {
+
+				const color = parseColor( line );
+
+				const item = document.createElement( 'li' );
+				item.className = 'ct-batch__item';
+
+				const dot = document.createElement( 'span' );
+				dot.className = 'ct-batch__dot';
+				dot.style.background = color ? toRgbString( color ) : 'transparent';
+
+				const src = document.createElement( 'span' );
+				src.className = 'ct-batch__src';
+				src.textContent = line;
+
+				const hex = document.createElement( 'span' );
+				hex.className = 'ct-batch__hex';
+
+				if ( color ) {
+
+					hex.textContent = color.a < 1 ? toHex8( color ) : toHex( color );
+
+				} else {
+
+					hex.textContent = 'ungültig';
+					hex.setAttribute( 'data-state', 'error' );
+
+				}
+
+				item.append( dot, src, hex );
+				batchList.appendChild( item );
+
+			});
+
+			batchCount.textContent = lines.length + ( lines.length === 1 ? ' Wert' : ' Werte' );
+			batch.hidden = false;
+
+		}
+
+		function getLines() {
+
+			return input.value.split( '\n' ).map( ( line ) => line.trim() ).filter( Boolean );
+
+		}
+
+		function autoGrow() {
+
+			input.style.height = 'auto';
+			input.style.height = input.scrollHeight + 'px';
+
+		}
+
+		function process() {
+
+			autoGrow();
+
+			const lines = getLines();
+
+			status.textContent = '';
+			status.removeAttribute( 'data-state' );
+
+			if ( ! lines.length ) {
+
+				input.removeAttribute( 'data-state' );
+				renderSingle( null );
+				batch.hidden = true;
+				btnCopyAll.disabled = true;
+				return;
+
+			}
+
+			const color = parseColor( lines[0] );
+
+			input.setAttribute( 'data-state', color ? 'ok' : 'error' );
+			renderSingle( color );
+
+			if ( lines.length > 1 ) {
+
+				renderBatch( lines );
+				btnCopyAll.disabled = false;
+
+			} else {
+
+				batch.hidden = true;
+				btnCopyAll.disabled = true;
+
+			}
+
+		}
+
+		async function copyText( text, label ) {
+
+			try {
+
+				await navigator.clipboard.writeText( text );
+				status.textContent = label + ' kopiert.';
+				status.setAttribute( 'data-state', 'done' );
+
+			} catch ( err ) {
+
+				status.textContent = 'Kopieren nicht möglich.';
+				status.setAttribute( 'data-state', 'error' );
+
+			}
+
+		}
+
+		input.addEventListener( 'input', process );
+
+		// Enter should not add empty lines - only Shift+Enter starts a new value
+		input.addEventListener( 'keydown', ( e ) => {
+
+			if ( e.key === 'Enter' && ! e.shiftKey ) e.preventDefault();
+
+		});
+
+		copyBtns.forEach( ( btn ) => {
+
+			btn.addEventListener( 'click', () => {
+
+				const source = document.getElementById( btn.dataset.source );
+				copyText( source.textContent, source.previousElementSibling.textContent );
+
+			});
+
+		});
+
+		btnCopyAll.addEventListener( 'click', () => {
+
+			const hexList = getLines()
+				.map( ( line ) => {
+
+					const color = parseColor( line );
+					if ( ! color ) return null;
+
+					return color.a < 1 ? toHex8( color ) : toHex( color );
+
+				})
+				.filter( Boolean );
+
+			if ( ! hexList.length ) {
+
+				status.textContent = 'Keine gültigen Werte.';
+				status.setAttribute( 'data-state', 'error' );
+				return;
+
+			}
+
+			copyText( hexList.join( '\n' ), hexList.length + ' HEX-Werte' );
+
+		});
+
+		btnPaste.addEventListener( 'click', async () => {
+
+			try {
+
+				const text = await navigator.clipboard.readText();
+				input.value = text.trim();
+				process();
+				input.focus();
+
+			} catch ( err ) {
+
+				status.textContent = 'Zwischenablage nicht lesbar – bitte manuell einfügen.';
+				status.setAttribute( 'data-state', 'error' );
+
+			}
+
+		});
+
+		btnClear.addEventListener( 'click', () => {
+
+			input.value = '';
+			process();
+			input.focus();
+
+		});
+
+		process();
+
+	})();
+
+</script>
+
+<script>
+
+	( function() {
+
+		const navSections = document.querySelectorAll( '.js-nav-section' );
+		const navItems = document.querySelectorAll( '.js-nav-item' );
+		const tabBtns = document.querySelectorAll( '.js-tab-btn' );
+
+		const setActive = ( id ) => {
+
+			navItems.forEach( ( item ) => {
+
+				item.classList.toggle( 'is-active', item.dataset.target === id );
+
+			});
+
+			tabBtns.forEach( ( btn ) => {
+
+				btn.classList.toggle( 'is-active', btn.dataset.target === id );
+
+			});
+
+		};
+
+		const observer = new IntersectionObserver( ( entries ) => {
+
+			entries.forEach( ( entry ) => {
+
+				if ( entry.isIntersecting ) setActive( entry.target.id );
+
+			});
+
+		}, { rootMargin: '-10% 0px -60% 0px', threshold: 0 });
+
+		navSections.forEach( ( section ) => observer.observe( section ) );
+
+		tabBtns.forEach( ( btn ) => {
+
+			btn.addEventListener( 'click', () => {
+
+				setActive( btn.dataset.target );
+				const target = document.getElementById( btn.dataset.target );
+				target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+			});
+
+		});
+
+		navItems.forEach( ( item ) => {
+
+			item.addEventListener( 'click', ( e ) => {
+
+				e.preventDefault();
+				setActive( item.dataset.target );
+				const target = document.getElementById( item.dataset.target );
+				target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+			});
+
+		});
+
+	})();
+
+</script>
+
+</body>
+</html>
