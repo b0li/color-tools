@@ -524,6 +524,7 @@
 
 	<div class="ct-tab-bar">
 		<button type="button" class="ct-tab-btn js-tab-btn" data-target="section-rgb-hex">RGB / RGBA → HEX</button>
+		<button type="button" class="ct-tab-btn js-tab-btn" data-target="section-hex-rgb">HEX → RGB / RGBA</button>
 	</div><!-- end .ct-tab-bar -->
 
 	<div class="ct-section-header js-nav-section" id="section-rgb-hex">
@@ -559,7 +560,7 @@
 
 	</div><!-- end .ct-card -->
 
-	<div class="ct-result">
+	<div class="ct-result" id="rh-result">
 
 		<div class="ct-swatch">
 			<span class="ct-swatch__fill" id="rh-swatch"></span>
@@ -610,12 +611,101 @@
 
 	</div><!-- end .ct-actions -->
 
+	<div class="ct-section-header js-nav-section" id="section-hex-rgb">
+		<h2>HEX → RGB / RGBA</h2>
+		<p>HEX-Code einfügen – RGB- und RGBA-Wert werden sofort berechnet</p>
+	</div><!-- end .ct-section-header -->
+
+	<div class="ct-card">
+
+		<div class="ct-input-row">
+
+			<label for="hr-input" class="sr-only">HEX-Code</label>
+			<textarea
+				id="hr-input"
+				class="ct-input"
+				rows="1"
+				placeholder="#D4A55A80"
+				autocomplete="off"
+				spellcheck="false"
+			></textarea>
+
+			<button type="button" id="hr-btn-paste" class="btn btn--ghost">
+				Einfügen
+			</button>
+
+			<button type="button" id="hr-btn-clear" class="btn btn--ghost">
+				Leeren
+			</button>
+
+		</div><!-- end .ct-input-row -->
+
+		<p class="ct-hint">Akzeptiert <code>#D4A55A</code>, <code>D4A55A</code>, Kurzform <code>#FA0</code> sowie mit Alpha <code>#D4A55A80</code> / <code>#FA08</code> – mehrere Werte einfach zeilenweise einfügen.</p>
+
+	</div><!-- end .ct-card -->
+
+	<div class="ct-result" id="hr-result">
+
+		<div class="ct-swatch">
+			<span class="ct-swatch__fill" id="hr-swatch"></span>
+		</div><!-- end .ct-swatch -->
+
+		<div class="ct-values">
+
+			<div class="ct-value">
+				<span class="ct-value__label">RGB</span>
+				<span class="ct-value__out" id="hr-rgb" data-empty="true">–</span>
+				<button type="button" class="btn btn--accent btn--mini js-copy" data-source="hr-rgb" disabled>Kopieren</button>
+			</div>
+
+			<div class="ct-value">
+				<span class="ct-value__label">RGBA</span>
+				<span class="ct-value__out" id="hr-rgba" data-empty="true">–</span>
+				<button type="button" class="btn btn--ghost btn--mini js-copy" data-source="hr-rgba" disabled>Kopieren</button>
+			</div>
+
+			<div class="ct-value">
+				<span class="ct-value__label">Werte</span>
+				<span class="ct-value__out" id="hr-raw" data-empty="true">–</span>
+				<button type="button" class="btn btn--ghost btn--mini js-copy" data-source="hr-raw" disabled>Kopieren</button>
+			</div>
+
+		</div><!-- end .ct-values -->
+
+	</div><!-- end .ct-result -->
+
+	<div class="ct-batch" id="hr-batch" hidden>
+
+		<div class="ct-batch__label">
+			<span>Mehrere Werte</span>
+			<span id="hr-batch-count">0</span>
+		</div>
+
+		<ul class="ct-batch__list" id="hr-batch-list"></ul>
+
+	</div><!-- end .ct-batch -->
+
+	<div class="ct-actions">
+
+		<button type="button" id="hr-btn-copy-all" class="btn btn--ghost" disabled>
+			Alle RGB kopieren
+		</button>
+
+		<span class="ct-status" id="hr-status" role="status"></span>
+
+	</div><!-- end .ct-actions -->
+
 </div><!-- end .ct-tool -->
 
 <nav class="ct-scroll-nav" aria-label="Sektionsnavigation">
 
 	<a class="ct-scroll-nav__item js-nav-item" href="#section-rgb-hex" data-target="section-rgb-hex" aria-label="Zu RGB / RGBA → HEX springen">
 		<span class="ct-scroll-nav__label">RGB / RGBA → HEX</span>
+		<span class="ct-scroll-nav__dot"></span>
+	</a>
+
+	<a class="ct-scroll-nav__item js-nav-item" href="#section-hex-rgb" data-target="section-hex-rgb" aria-label="Zu HEX → RGB / RGBA springen">
+		<span class="ct-scroll-nav__label">HEX → RGB / RGBA</span>
 		<span class="ct-scroll-nav__dot"></span>
 	</a>
 
@@ -637,7 +727,7 @@
 		const btnClear = document.getElementById( 'rh-btn-clear' );
 		const btnCopyAll = document.getElementById( 'rh-btn-copy-all' );
 		const status = document.getElementById( 'rh-status' );
-		const copyBtns = document.querySelectorAll( '.js-copy' );
+		const copyBtns = document.querySelectorAll( '#rh-result .js-copy' );
 
 		const clamp = ( value, min, max ) => Math.min( max, Math.max( min, value ) );
 
@@ -921,6 +1011,296 @@
 			}
 
 			copyText( hexList.join( '\n' ), hexList.length + ' HEX-Werte' );
+
+		});
+
+		btnPaste.addEventListener( 'click', async () => {
+
+			try {
+
+				const text = await navigator.clipboard.readText();
+				input.value = text.trim();
+				process();
+				input.focus();
+
+			} catch ( err ) {
+
+				status.textContent = 'Zwischenablage nicht lesbar – bitte manuell einfügen.';
+				status.setAttribute( 'data-state', 'error' );
+
+			}
+
+		});
+
+		btnClear.addEventListener( 'click', () => {
+
+			input.value = '';
+			process();
+			input.focus();
+
+		});
+
+		process();
+
+	})();
+
+</script>
+
+<script>
+
+	( function() {
+
+		const input = document.getElementById( 'hr-input' );
+		const swatch = document.getElementById( 'hr-swatch' );
+		const outRgb = document.getElementById( 'hr-rgb' );
+		const outRgba = document.getElementById( 'hr-rgba' );
+		const outRaw = document.getElementById( 'hr-raw' );
+		const batch = document.getElementById( 'hr-batch' );
+		const batchList = document.getElementById( 'hr-batch-list' );
+		const batchCount = document.getElementById( 'hr-batch-count' );
+		const btnPaste = document.getElementById( 'hr-btn-paste' );
+		const btnClear = document.getElementById( 'hr-btn-clear' );
+		const btnCopyAll = document.getElementById( 'hr-btn-copy-all' );
+		const status = document.getElementById( 'hr-status' );
+		const copyBtns = document.querySelectorAll( '#hr-result .js-copy' );
+
+		function parseHex( raw ) {
+
+			// Grab the trailing hex token, so a full declaration like "color: #1a1d23;" works too
+			const match = raw.trim().replace( /;+\s*$/, '' ).trim().match( /#?([0-9a-f]+)$/i );
+
+			if ( ! match ) return null;
+
+			let hex = match[1];
+
+			// Expand shorthand: "FA0" -> "FFAA00", "FA08" -> "FFAA0088"
+			if ( hex.length === 3 || hex.length === 4 ) {
+
+				hex = hex.split( '' ).map( ( char ) => char + char ).join( '' );
+
+			}
+
+			if ( hex.length !== 6 && hex.length !== 8 ) return null;
+
+			const r = parseInt( hex.slice( 0, 2 ), 16 );
+			const g = parseInt( hex.slice( 2, 4 ), 16 );
+			const b = parseInt( hex.slice( 4, 6 ), 16 );
+
+			let a = 1;
+
+			if ( hex.length === 8 ) {
+
+				// Round to 3 decimals so 0x80 reads as 0.502 instead of 0.5019607843137255
+				a = Math.round( parseInt( hex.slice( 6, 8 ), 16 ) / 255 * 1000 ) / 1000;
+
+			}
+
+			return { r, g, b, a };
+
+		}
+
+		const toRgbString = ( color ) => 'rgb( ' + color.r + ', ' + color.g + ', ' + color.b + ' )';
+
+		const toRgbaString = ( color ) => 'rgba( ' + color.r + ', ' + color.g + ', ' + color.b + ', ' + color.a + ' )';
+
+		const toRawString = ( color ) => color.r + ', ' + color.g + ', ' + color.b;
+
+		// Alpha-aware output for lists and the color preview
+		const toCssString = ( color ) => color.a < 1 ? toRgbaString( color ) : toRgbString( color );
+
+		function setValue( el, text ) {
+
+			const isEmpty = ! text;
+
+			el.textContent = isEmpty ? '–' : text;
+			el.setAttribute( 'data-empty', isEmpty ? 'true' : 'false' );
+
+		}
+
+		function setCopyEnabled( enabled ) {
+
+			copyBtns.forEach( ( btn ) => {
+
+				btn.disabled = ! enabled;
+
+			});
+
+		}
+
+		function renderSingle( color ) {
+
+			if ( ! color ) {
+
+				swatch.style.background = 'transparent';
+				setValue( outRgb, '' );
+				setValue( outRgba, '' );
+				setValue( outRaw, '' );
+				setCopyEnabled( false );
+				return;
+
+			}
+
+			swatch.style.background = toCssString( color );
+			setValue( outRgb, toRgbString( color ) );
+			setValue( outRgba, toRgbaString( color ) );
+			setValue( outRaw, toRawString( color ) );
+			setCopyEnabled( true );
+
+		}
+
+		function renderBatch( lines ) {
+
+			batchList.innerHTML = '';
+
+			lines.forEach( ( line ) => {
+
+				const color = parseHex( line );
+
+				const item = document.createElement( 'li' );
+				item.className = 'ct-batch__item';
+
+				const dot = document.createElement( 'span' );
+				dot.className = 'ct-batch__dot';
+				dot.style.background = color ? toCssString( color ) : 'transparent';
+
+				const src = document.createElement( 'span' );
+				src.className = 'ct-batch__src';
+				src.textContent = line;
+
+				const result = document.createElement( 'span' );
+				result.className = 'ct-batch__hex';
+
+				if ( color ) {
+
+					result.textContent = toCssString( color );
+
+				} else {
+
+					result.textContent = 'ungültig';
+					result.setAttribute( 'data-state', 'error' );
+
+				}
+
+				item.append( dot, src, result );
+				batchList.appendChild( item );
+
+			});
+
+			batchCount.textContent = lines.length + ( lines.length === 1 ? ' Wert' : ' Werte' );
+			batch.hidden = false;
+
+		}
+
+		function getLines() {
+
+			return input.value.split( '\n' ).map( ( line ) => line.trim() ).filter( Boolean );
+
+		}
+
+		function autoGrow() {
+
+			input.style.height = 'auto';
+			input.style.height = input.scrollHeight + 'px';
+
+		}
+
+		function process() {
+
+			autoGrow();
+
+			const lines = getLines();
+
+			status.textContent = '';
+			status.removeAttribute( 'data-state' );
+
+			if ( ! lines.length ) {
+
+				input.removeAttribute( 'data-state' );
+				renderSingle( null );
+				batch.hidden = true;
+				btnCopyAll.disabled = true;
+				return;
+
+			}
+
+			const color = parseHex( lines[0] );
+
+			input.setAttribute( 'data-state', color ? 'ok' : 'error' );
+			renderSingle( color );
+
+			if ( lines.length > 1 ) {
+
+				renderBatch( lines );
+				btnCopyAll.disabled = false;
+
+			} else {
+
+				batch.hidden = true;
+				btnCopyAll.disabled = true;
+
+			}
+
+		}
+
+		async function copyText( text, label ) {
+
+			try {
+
+				await navigator.clipboard.writeText( text );
+				status.textContent = label + ' kopiert.';
+				status.setAttribute( 'data-state', 'done' );
+
+			} catch ( err ) {
+
+				status.textContent = 'Kopieren nicht möglich.';
+				status.setAttribute( 'data-state', 'error' );
+
+			}
+
+		}
+
+		input.addEventListener( 'input', process );
+
+		// Enter should not add empty lines - only Shift+Enter starts a new value
+		input.addEventListener( 'keydown', ( e ) => {
+
+			if ( e.key === 'Enter' && ! e.shiftKey ) e.preventDefault();
+
+		});
+
+		copyBtns.forEach( ( btn ) => {
+
+			btn.addEventListener( 'click', () => {
+
+				const source = document.getElementById( btn.dataset.source );
+				copyText( source.textContent, source.previousElementSibling.textContent );
+
+			});
+
+		});
+
+		btnCopyAll.addEventListener( 'click', () => {
+
+			const list = getLines()
+				.map( ( line ) => {
+
+					const color = parseHex( line );
+					if ( ! color ) return null;
+
+					return toCssString( color );
+
+				})
+				.filter( Boolean );
+
+			if ( ! list.length ) {
+
+				status.textContent = 'Keine gültigen Werte.';
+				status.setAttribute( 'data-state', 'error' );
+				return;
+
+			}
+
+			copyText( list.join( '\n' ), list.length + ' RGB-Werte' );
 
 		});
 
